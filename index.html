@@ -85,7 +85,7 @@
             <h1 class="text-lg font-bold text-slate-900 tracking-tight">SmartPO Studio</h1>
             <span id="headerEngineBadge" class="px-2 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Gemini Ready</span>
+              <span>Gemini & OCR Ready</span>
             </span>
           </div>
           <p class="text-xs text-slate-500 hidden sm:block">Intelligent Purchase Order OCR, Line-item Auditing & Dual-Engine Extraction</p>
@@ -177,10 +177,14 @@
           <div class="flex flex-col gap-2">
             <div class="flex items-center justify-between text-xs">
               <span class="font-medium text-slate-600">Preferred Parser:</span>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <label class="inline-flex items-center gap-1 cursor-pointer">
                   <input type="radio" name="parserMode" value="auto" checked class="text-brand-600 focus:ring-brand-500">
-                  <span class="text-slate-700">Auto (Gemini with Fallback)</span>
+                  <span class="text-slate-700">Auto (AI & OCR)</span>
+                </label>
+                <label class="inline-flex items-center gap-1 cursor-pointer">
+                  <input type="radio" name="parserMode" value="ocr" class="text-brand-600 focus:ring-brand-500">
+                  <span class="text-slate-700">OCR Engine</span>
                 </label>
                 <label class="inline-flex items-center gap-1 cursor-pointer">
                   <input type="radio" name="parserMode" value="local" class="text-brand-600 focus:ring-brand-500">
@@ -236,6 +240,10 @@
 
             <!-- Action buttons -->
             <div class="flex items-center gap-2">
+              <button id="clearExtractedPoBtn" title="Clear Extracted PO Data" class="p-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg border border-slate-200 hover:border-red-200 transition-colors text-xs font-medium flex items-center gap-1.5">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span class="hidden sm:inline">Clear</span>
+              </button>
               <button id="printPoBtn" title="Print PO" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors text-xs font-medium flex items-center gap-1.5">
                 <i data-lucide="printer" class="w-3.5 h-3.5"></i>
                 <span class="hidden sm:inline">Print</span>
@@ -413,8 +421,8 @@
             <i data-lucide="key" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="font-bold text-slate-900 text-sm">Gemini API Settings</h3>
-            <p class="text-xs text-slate-500">Configure or test your Google Gemini API key</p>
+            <h3 class="font-bold text-slate-900 text-sm">API Configuration</h3>
+            <p class="text-xs text-slate-500">Configure Google Gemini AI & OCR Engine API keys</p>
           </div>
         </div>
         <button id="closeApiModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
@@ -422,22 +430,86 @@
         </button>
       </div>
 
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-4">
+        <!-- Gemini Key -->
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Custom Gemini API Key (Optional)</label>
-          <input type="password" id="customApiKeyInput" placeholder="AIzaSy..." class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500" />
-          <p class="text-[11px] text-slate-400 mt-1">If left blank, the app uses the platform environment key or gracefully defaults to the built-in High-Precision Heuristics Engine.</p>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+            Custom Gemini API Key (Optional)
+          </label>
+          <div class="relative">
+            <input type="password" id="customApiKeyInput" placeholder="AIzaSy..." class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-9 py-2 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <button type="button" id="toggleGeminiKeyVisBtn" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none" title="Toggle visibility">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">Used for AI-driven purchase order structured parsing & vision evaluation.</p>
         </div>
 
-        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-          <div class="flex flex-col">
-            <span class="text-xs font-semibold text-slate-700">Test Connection</span>
-            <span id="apiStatusMessage" class="text-[11px] text-slate-500">Status: Unverified</span>
+        <!-- OCR Provider & Key -->
+        <div class="flex flex-col gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5 text-indigo-600"></i>
+              OCR Engine & Jina OCR Setup
+            </label>
+            <span class="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">Jina OCR v1 Ready</span>
           </div>
-          <button id="testApiKeyBtn" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5">
-            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-            <span>Test Key</span>
-          </button>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">OCR Model / Provider</label>
+              <select id="ocrProviderSelect" class="w-full text-xs bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-brand-500 font-medium cursor-pointer">
+                <option value="docker_jina">Docker AI (http://localhost:11434/v1/chat/completions)</option>
+                <option value="docker_8000">Docker Local (http://localhost:8000/v1/chat/completions)</option>
+                <option value="hf_jina">HuggingFace API (https://api-inference.huggingface.co/...)</option>
+                <option value="ocrspace">OCR.space Cloud API</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">OCR Endpoint URL</label>
+              <input type="text" id="customOcrEndpointInput" placeholder="http://localhost:11434/v1/chat/completions" class="w-full text-xs font-mono bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 focus:ring-2 focus:ring-brand-500" value="http://localhost:11434/v1/chat/completions" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Jina / OCR API Key</label>
+            <div class="relative">
+              <input type="password" id="customOcrApiKeyInput" placeholder="jina_... or hf_... or Docker Bearer token" class="w-full text-xs font-mono bg-white border border-slate-200 rounded-lg pl-3 pr-9 py-2 focus:ring-2 focus:ring-brand-500" />
+              <button type="button" id="toggleOcrKeyVisBtn" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none" title="Toggle visibility">
+                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">Supports Jina AI (`jina-ocr-v1`), HuggingFace inference, or local Docker (`docker model run hf.co/jinaai/jina-ocr-v1`).</p>
+          </div>
+        </div>
+
+        <!-- Connection Test Box -->
+        <div class="flex flex-col gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-100">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span class="font-semibold text-slate-700">Gemini API:</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="apiStatusMessage" class="text-[11px] text-slate-500">Unverified</span>
+              <button id="testApiKeyBtn" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-medium rounded-md transition-colors flex items-center gap-1">
+                <span>Test</span>
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-200/60">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span class="font-semibold text-slate-700">Jina / OCR API:</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="ocrStatusMessage" class="text-[11px] text-slate-500">Unverified</span>
+              <button id="testOcrKeyBtn" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-medium rounded-md transition-colors flex items-center gap-1">
+                <span>Test</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -642,6 +714,9 @@ No Shipping fees.`,
     let uploadedBase64Image = null;
     let poHistory = [];
     let customApiKey = localStorage.getItem('gemini_user_api_key') || '';
+    let customOcrApiKey = localStorage.getItem('ocr_user_api_key') || '';
+    let customOcrProvider = localStorage.getItem('ocr_provider') || 'jina';
+    let customOcrEndpoint = localStorage.getItem('ocr_endpoint') || 'https://api.jina.ai/v1/ocr';
   </script>
 
   <script>
@@ -658,6 +733,19 @@ No Shipping fees.`,
 
       // Update currency indicators throughout form
       document.querySelectorAll('.currency-symbol-label').forEach(el => el.textContent = currency);
+
+      if (!currentPO.items || currentPO.items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-6 text-center text-slate-400 text-xs font-medium italic">
+              No line items added yet. Click "+ Add Row" to insert a new line item.
+            </td>
+          </tr>
+        `;
+        document.getElementById('lineItemCount').textContent = `0 items`;
+        recalculateTotals();
+        return;
+      }
 
       currentPO.items.forEach((item, index) => {
         const qty = parseFloat(item.quantity) || 0;
@@ -765,9 +853,7 @@ No Shipping fees.`,
       document.getElementById('shippingInput').value = (currentPO.shipping !== undefined) ? currentPO.shipping : 0.00;
       document.getElementById('discountInput').value = (currentPO.discount !== undefined) ? currentPO.discount : 0.00;
 
-      if (currentPO.notes) {
-        document.getElementById('extractionNotes').textContent = currentPO.notes;
-      }
+      document.getElementById('extractionNotes').textContent = currentPO.notes || 'Purchase order workspace cleared.';
 
       renderLineItems();
     }
@@ -1031,6 +1117,123 @@ ${rawText || "Please inspect the attached PO image."}
         }
       }
     }
+
+    async function extractTextWithOCR(base64ImageData, ocrApiKey = '', provider = null, endpointUrl = null) {
+      const apiKey = ocrApiKey || localStorage.getItem('ocr_user_api_key') || '';
+      const prov = provider || localStorage.getItem('ocr_provider') || 'docker_jina';
+      let endpoint = endpointUrl || localStorage.getItem('ocr_endpoint');
+      
+      if (!endpoint) {
+        endpoint = (prov === 'docker_8000') ? 'http://localhost:8000/v1/chat/completions' :
+                   (prov === 'hf_jina') ? 'https://api-inference.huggingface.co/models/jinaai/jina-ocr-v1' :
+                   (prov === 'ocrspace') ? 'https://api.ocr.space/parse/image' :
+                   'http://localhost:11434/v1/chat/completions';
+      }
+
+      if (endpoint.includes('chat/completions') || prov.includes('docker') || prov === 'hf_jina') {
+        // OpenAI Vision format for docker model run (hf.co/jinaai/jina-ocr-v1) & LocalAI
+        const headers = { 'Content-Type': 'application/json' };
+        if (apiKey) {
+          headers['Authorization'] = `Bearer ${apiKey}`;
+          headers['x-api-key'] = apiKey;
+        }
+
+        const payload = {
+          model: "hf.co/jinaai/jina-ocr-v1",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "Perform high accuracy OCR on this purchase order image. Extract all text line by line verbatim." },
+                { type: "image_url", image_url: { url: `data:${base64ImageData.mimeType};base64,${base64ImageData.data}` } }
+              ]
+            }
+          ]
+        };
+
+        let res;
+        try {
+          res = await fetch(endpoint, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          throw new Error(`Cannot connect to Docker OCR endpoint at ${endpoint}. Please verify docker container is running.`);
+        }
+
+        if (!res.ok) {
+          throw new Error(`Jina OCR API returned HTTP ${res.status}. Check endpoint URL and model runner status.`);
+        }
+
+        const result = await res.json();
+        let text = result.choices?.[0]?.message?.content || result.response || result.text || result.data?.text;
+        if (!text || !text.trim()) {
+          throw new Error("Jina OCR returned empty output from image.");
+        }
+        return text.trim();
+      } else {
+        // OCR.space Fallback API
+        const formData = new FormData();
+        formData.append('apikey', apiKey || 'helloworld');
+        formData.append('base64Image', `data:${base64ImageData.mimeType};base64,${base64ImageData.data}`);
+        formData.append('language', 'eng');
+        formData.append('isOverlayRequired', 'false');
+        formData.append('OCREngine', '2');
+
+        const res = await fetch(endpoint || 'https://api.ocr.space/parse/image', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          throw new Error(`OCR API returned HTTP ${res.status}`);
+        }
+
+        const result = await res.json();
+        if (result.IsErroredOnProcessing) {
+          const errorMsg = Array.isArray(result.ErrorMessage) ? result.ErrorMessage.join(', ') : (result.ErrorMessage || 'OCR processing failed');
+          throw new Error(errorMsg);
+        }
+
+        const parsedText = result.ParsedResults?.[0]?.ParsedText;
+        if (!parsedText || !parsedText.trim()) {
+          throw new Error("OCR returned empty text from image.");
+        }
+      }
+    }
+
+    function clearExtractedPO() {
+      currentPO = {
+        poNumber: "",
+        issueDate: "",
+        dueDate: "",
+        paymentTerms: "",
+        currency: "$",
+        vendor: { name: "", address: "", contact: "", taxId: "" },
+        buyer: { name: "", address: "", contact: "", taxId: "" },
+        items: [],
+        shipping: 0.00,
+        discount: 0.00,
+        notes: "Workspace cleared."
+      };
+
+      // Reset left panel source inputs (text editor, image preview, preset dropdown, file input)
+      document.getElementById('rawTextEditor').value = '';
+      document.getElementById('imagePreviewContainer').classList.add('hidden');
+      document.getElementById('imagePreview').src = '';
+      uploadedBase64Image = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('presetSelector').value = '';
+
+      populateFormFromState();
+
+      const statusBadge = document.getElementById('poStatusBadge');
+      statusBadge.textContent = "Cleared / Blank";
+      statusBadge.className = "ml-2 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200";
+
+      showToast("Cleared all purchase order data.");
+    }
   </script>
 
   <script>
@@ -1204,6 +1407,30 @@ ${rawText || "Please inspect the attached PO image."}
       if (customApiKey) {
         document.getElementById('customApiKeyInput').value = customApiKey;
       }
+      if (customOcrApiKey) {
+        document.getElementById('customOcrApiKeyInput').value = customOcrApiKey;
+      }
+      if (customOcrProvider) {
+        document.getElementById('ocrProviderSelect').value = customOcrProvider;
+      }
+      if (customOcrEndpoint) {
+        document.getElementById('customOcrEndpointInput').value = customOcrEndpoint;
+      }
+
+      // Provider change listener to update endpoint defaults
+      document.getElementById('ocrProviderSelect').addEventListener('change', (e) => {
+        const prov = e.target.value;
+        const endpointInput = document.getElementById('customOcrEndpointInput');
+        if (prov === 'docker_jina') {
+          endpointInput.value = 'http://localhost:11434/v1/chat/completions';
+        } else if (prov === 'docker_8000') {
+          endpointInput.value = 'http://localhost:8000/v1/chat/completions';
+        } else if (prov === 'hf_jina') {
+          endpointInput.value = 'https://api-inference.huggingface.co/models/jinaai/jina-ocr-v1';
+        } else if (prov === 'ocrspace') {
+          endpointInput.value = 'https://api.ocr.space/parse/image';
+        }
+      });
 
       // Quick Sample selection
       document.getElementById('quickSampleBtn').addEventListener('click', () => {
@@ -1305,7 +1532,7 @@ ${rawText || "Please inspect the attached PO image."}
 
       // Dual-Engine Extraction trigger
       document.getElementById('extractBtn').addEventListener('click', async () => {
-        const rawText = document.getElementById('rawTextEditor').value.trim();
+        let rawText = document.getElementById('rawTextEditor').value.trim();
         if (!rawText && !uploadedBase64Image) {
           showToast("Please enter PO text or upload a file first.", "error");
           return;
@@ -1317,21 +1544,49 @@ ${rawText || "Please inspect the attached PO image."}
         const spinner = document.getElementById('extractSpinner');
 
         btn.disabled = true;
-        btnText.textContent = "Processing Extraction...";
         spinner.classList.remove('hidden');
 
         let extractedResult = null;
         let usedEngine = "Gemini AI";
 
-        if (parserMode === 'local') {
+        if (parserMode === 'ocr') {
+          // Dedicated OCR Engine mode
+          if (uploadedBase64Image) {
+            btnText.textContent = "Running OCR Recognition...";
+            try {
+              const ocrText = await extractTextWithOCR(uploadedBase64Image, customOcrApiKey);
+              document.getElementById('rawTextEditor').value = ocrText;
+              rawText = ocrText;
+              showToast("Image text extracted via OCR API!", "info");
+            } catch (ocrErr) {
+              console.warn("OCR API error:", ocrErr.message);
+              showToast(`OCR API Warning: ${ocrErr.message}. Falling back to text heuristics.`, "error");
+            }
+          }
+          extractedResult = parseWithLocalHeuristics(rawText);
+          usedEngine = customOcrApiKey && uploadedBase64Image ? "OCR API Engine + Heuristics" : "Local Heuristic Engine";
+        } else if (parserMode === 'local') {
           // Explicit local heuristic parse
+          btnText.textContent = "Processing Local Engine...";
           extractedResult = parseWithLocalHeuristics(rawText);
           usedEngine = "Local Heuristics Engine";
         } else {
-          // Attempt Gemini AI first
+          // Auto Mode (OCR pre-pass if image present & OCR key available, then Gemini AI)
+          if (uploadedBase64Image && customOcrApiKey && !rawText) {
+            btnText.textContent = "Running OCR Recognition...";
+            try {
+              const ocrText = await extractTextWithOCR(uploadedBase64Image, customOcrApiKey);
+              document.getElementById('rawTextEditor').value = ocrText;
+              rawText = ocrText;
+            } catch (ocrErr) {
+              console.warn("OCR pre-pass failed:", ocrErr.message);
+            }
+          }
+
+          btnText.textContent = "Processing Extraction...";
           try {
             extractedResult = await extractPOWithGemini(rawText, uploadedBase64Image);
-            usedEngine = "Gemini 3 Flash AI";
+            usedEngine = customOcrApiKey && uploadedBase64Image ? "Gemini 3 AI (with OCR)" : "Gemini 3 Flash AI";
           } catch (err) {
             console.warn("AI extraction fell back to local engine:", err.message);
             extractedResult = parseWithLocalHeuristics(rawText);
@@ -1431,6 +1686,7 @@ ${rawText || "Please inspect the attached PO image."}
       });
 
       // Actions
+      document.getElementById('clearExtractedPoBtn').addEventListener('click', clearExtractedPO);
       document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
       document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
       document.getElementById('savePoBtn').addEventListener('click', savePOToHistory);
@@ -1445,15 +1701,59 @@ ${rawText || "Please inspect the attached PO image."}
         apiModal.classList.add('hidden');
       });
 
+      // Toggle visibility for API Keys
+      const toggleVis = (btnId, inputId) => {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          const input = document.getElementById(inputId);
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = `<i data-lucide="eye-off" class="w-3.5 h-3.5"></i>`;
+          } else {
+            input.type = 'password';
+            btn.innerHTML = `<i data-lucide="eye" class="w-3.5 h-3.5"></i>`;
+          }
+          lucide.createIcons();
+        });
+      };
+      toggleVis('toggleGeminiKeyVisBtn', 'customApiKeyInput');
+      toggleVis('toggleOcrKeyVisBtn', 'customOcrApiKeyInput');
+
       document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
-        const val = document.getElementById('customApiKeyInput').value.trim();
-        customApiKey = val;
-        if (val) {
-          localStorage.setItem('gemini_user_api_key', val);
-          showToast("Gemini API key saved to local session.");
+        const geminiVal = document.getElementById('customApiKeyInput').value.trim();
+        const ocrVal = document.getElementById('customOcrApiKeyInput').value.trim();
+        const ocrProv = document.getElementById('ocrProviderSelect').value;
+        const ocrEnd = document.getElementById('customOcrEndpointInput').value.trim();
+        
+        customApiKey = geminiVal;
+        customOcrApiKey = ocrVal;
+        customOcrProvider = ocrProv;
+        customOcrEndpoint = ocrEnd;
+
+        if (geminiVal) {
+          localStorage.setItem('gemini_user_api_key', geminiVal);
         } else {
           localStorage.removeItem('gemini_user_api_key');
-          showToast("Using default environment / local heuristic config.");
+        }
+
+        if (ocrVal) {
+          localStorage.setItem('ocr_user_api_key', ocrVal);
+        } else {
+          localStorage.removeItem('ocr_user_api_key');
+        }
+
+        localStorage.setItem('ocr_provider', ocrProv);
+        if (ocrEnd) {
+          localStorage.setItem('ocr_endpoint', ocrEnd);
+        } else {
+          localStorage.removeItem('ocr_endpoint');
+        }
+
+        if (ocrProv === 'jina' || ocrProv === 'docker_local') {
+          showToast(`Jina OCR v1 configuration saved.`);
+        } else {
+          showToast(`API Configuration saved.`);
         }
         apiModal.classList.add('hidden');
       });
@@ -1479,6 +1779,82 @@ ${rawText || "Please inspect the attached PO image."}
           }
         } catch (e) {
           statusMsg.textContent = "Network unreachable";
+          statusMsg.className = "text-[11px] text-rose-600";
+        }
+      });
+
+      document.getElementById('testOcrKeyBtn').addEventListener('click', async () => {
+        const statusMsg = document.getElementById('ocrStatusMessage');
+        statusMsg.textContent = "Testing OCR endpoint...";
+        statusMsg.className = "text-[11px] text-amber-600";
+
+        const key = document.getElementById('customOcrApiKeyInput').value.trim();
+        const prov = document.getElementById('ocrProviderSelect').value;
+        let userEndpoint = document.getElementById('customOcrEndpointInput').value.trim();
+
+        const candidateUrls = [
+          userEndpoint,
+          'http://localhost:11434/v1/chat/completions',
+          'http://localhost:8000/v1/chat/completions',
+          'https://api-inference.huggingface.co/models/jinaai/jina-ocr-v1',
+          'https://api.ocr.space/parse/image'
+        ].filter((url, idx, self) => url && self.indexOf(url) === idx);
+
+        let verified = false;
+
+        for (const url of candidateUrls) {
+          try {
+            if (url.includes('chat/completions') || url.includes('11434') || url.includes('8000') || prov.includes('docker')) {
+              const headers = { 'Content-Type': 'application/json' };
+              if (key) headers['Authorization'] = `Bearer ${key}`;
+
+              const res = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                  model: "hf.co/jinaai/jina-ocr-v1",
+                  messages: [{ role: "user", content: "ping" }]
+                })
+              });
+
+              if (res.ok || res.status === 400 || res.status === 422) {
+                document.getElementById('customOcrEndpointInput').value = url;
+                statusMsg.textContent = "Docker Jina OCR Verified (Active)";
+                statusMsg.className = "text-[11px] text-emerald-600 font-medium";
+                verified = true;
+                break;
+              }
+            } else if (url.includes('huggingface')) {
+              const headers = { 'Content-Type': 'application/json' };
+              if (key) headers['Authorization'] = `Bearer ${key}`;
+              const res = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify({ inputs: "ping" }) });
+              if (res.ok || res.status === 400) {
+                document.getElementById('customOcrEndpointInput').value = url;
+                statusMsg.textContent = "HuggingFace Jina OCR Verified";
+                statusMsg.className = "text-[11px] text-emerald-600 font-medium";
+                verified = true;
+                break;
+              }
+            } else if (url.includes('ocr.space')) {
+              const formData = new FormData();
+              formData.append('apikey', key || 'helloworld');
+              formData.append('url', 'https://dl.ocr.space/V2/eng/bo.png');
+              const res = await fetch(url, { method: 'POST', body: formData });
+              if (res.ok) {
+                document.getElementById('customOcrEndpointInput').value = url;
+                statusMsg.textContent = "OCR.space Verified (Active)";
+                statusMsg.className = "text-[11px] text-emerald-600 font-medium";
+                verified = true;
+                break;
+              }
+            }
+          } catch (e) {
+            // Move to next candidate in auto-probe
+          }
+        }
+
+        if (!verified) {
+          statusMsg.textContent = "Endpoint Unreachable (Check Docker local port)";
           statusMsg.className = "text-[11px] text-rose-600";
         }
       });
