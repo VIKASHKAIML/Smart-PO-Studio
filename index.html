@@ -1099,6 +1099,9 @@ ${rawText || "Please inspect the attached PO image."}
           });
 
           if (!res.ok) {
+            if (res.status === 429) {
+              throw new Error("HTTP 429: Gemini API Rate Limit reached. Auto-switching to Local Engine.");
+            }
             throw new Error(`Gemini API returned status ${res.status}`);
           }
 
@@ -1589,8 +1592,13 @@ ${rawText || "Please inspect the attached PO image."}
             usedEngine = customOcrApiKey && uploadedBase64Image ? "Gemini 3 AI (with OCR)" : "Gemini 3 Flash AI";
           } catch (err) {
             console.warn("AI extraction fell back to local engine:", err.message);
+            if (err.message.includes('429')) {
+              showToast("Gemini Rate Limit (HTTP 429) reached. Auto-switched to Local Engine.", "info");
+              usedEngine = "Local Engine (Rate Limit Fallback)";
+            } else {
+              usedEngine = "High-Precision Local Engine";
+            }
             extractedResult = parseWithLocalHeuristics(rawText);
-            usedEngine = "High-Precision Local Engine";
           }
         }
 
@@ -1773,6 +1781,10 @@ ${rawText || "Please inspect the attached PO image."}
           if (res.ok) {
             statusMsg.textContent = "Connection Verified (Active)";
             statusMsg.className = "text-[11px] text-emerald-600 font-medium";
+          } else if (res.status === 429) {
+            statusMsg.textContent = "Key Valid (HTTP 429 Rate Limited)";
+            statusMsg.className = "text-[11px] text-amber-600 font-medium";
+            showToast("Gemini API key is valid, but currently rate-limited (HTTP 429).", "info");
           } else {
             statusMsg.textContent = `Error: HTTP ${res.status}`;
             statusMsg.className = "text-[11px] text-rose-600";
